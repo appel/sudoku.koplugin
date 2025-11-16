@@ -20,6 +20,8 @@ local Font = require("ui/font")
 local _ = require("gettext")
 local T = require("ffi/util").template
 
+local DISPLAY_PINS_ON_GIVEN = true
+
 local Screen = Device.screen
 local DEFAULT_DIFFICULTY = "medium"
 local DIFFICULTY_ORDER = { "easy", "medium", "hard" }
@@ -535,9 +537,11 @@ function SudokuBoardWidget:paintTo(bb, x, y)
     local cell = self.dimen.w / 9
     bb:paintRect(x, y, self.dimen.w, self.dimen.h, Blitbuffer.COLOR_WHITE)
     local sel_row, sel_col = self.board:getSelection()
-    local highlight_color = Blitbuffer.COLOR_GRAY_E
-    bb:paintRect(x + (sel_col - 1) * cell, y, cell, self.dimen.h, highlight_color)
-    bb:paintRect(x, y + (sel_row - 1) * cell, self.dimen.w, cell, highlight_color)
+    local band_highlight = Blitbuffer.COLOR_GRAY_D
+    local cell_highlight = Blitbuffer.COLOR_GRAY
+    bb:paintRect(x + (sel_col - 1) * cell, y, cell, self.dimen.h, band_highlight)
+    bb:paintRect(x, y + (sel_row - 1) * cell, self.dimen.w, cell, band_highlight)
+    bb:paintRect(x + (sel_col - 1) * cell, y + (sel_row - 1) * cell, cell, cell, cell_highlight)
     for i = 0, 9 do
         local thickness = (i % 3 == 0) and Size.line.thick or Size.line.thin
         drawLine(bb, x + math.floor(i * cell), y, thickness, self.dimen.h, Blitbuffer.COLOR_BLACK)
@@ -566,10 +570,10 @@ function SudokuBoardWidget:paintTo(bb, x, y)
                 local baseline = cell_y + math.floor((cell + metrics.y_top - metrics.y_bottom) / 2)
                 local text_x = cell_x + math.floor((cell - text_w) / 2)
                 RenderText:renderUtf8Text(bb, text_x, baseline, self.number_face, text, true, false, color)
-                if is_given then
-                    local dot = math.max(1, math.floor(cell / 28))
-                    local padding = math.max(1, math.floor(cell / 24))
-                    local dot_color = Blitbuffer.COLOR_GRAY_2
+                if is_given and DISPLAY_PINS_ON_GIVEN then
+                    local dot = math.max(1, math.floor(cell / 18))
+                    local padding = math.max(1, math.floor(cell / 20))
+                    local dot_color = Blitbuffer.COLOR_GRAY_4
                     bb:paintRect(cell_x + padding, cell_y + padding, dot, dot, dot_color)
                     bb:paintRect(cell_x + cell - padding - dot, cell_y + padding, dot, dot, dot_color)
                     bb:paintRect(cell_x + padding, cell_y + cell - padding - dot, dot, dot, dot_color)
